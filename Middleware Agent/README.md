@@ -1,6 +1,4 @@
-# Building a Support Desk across Three Architectures - 
-
-# Telecom Customer Support
+# Building a Support Desk across Three Architectures - Telecom Customer Support
 
 ## Stage 1 -- LangChain (create_agent)
 
