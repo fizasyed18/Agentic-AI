@@ -96,7 +96,4 @@ IF result: 4 > 2 → True. Emails sent: "Send Delayed Email" (apology to custome
 
 { "order_id": "GC-1005", "customer_name": "Daniel Khan", "email": "daniel.khan@example.com", "order_status": "Delayed", "days_in_status": 2 }
 
-<img width="560" height="160" alt="Architecture-Breakdown" src="https://github.com/user-attachments/assets/439ef799-2f19-4517-831a-1737b28f12c1" />
 IF result: 2 > 2 is false → False. Email sent: "Send Delayed Email" only (apology to customer). No warehouse alert sent. Sheet row: logged via "Delayed-Not Escalated Log" — status= Delayed, days= 2, escalated= false.
-  
-**4. n8n workflow**
