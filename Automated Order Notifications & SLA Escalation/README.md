@@ -28,8 +28,6 @@ The workflow consists of 8 core stages:
 
 ### **1. Documentation**
 
-<img width="560" height="160" alt="Architecture-Breakdown" src="https://github.com/user-attachments/assets/fc3c9842-42c4-432e-8fb3-cb028c79308c" />
-
 • **Problem statement & weekly manual effort savings**
 
 GreenCart's support team checks each order's status individually and writes a separate email for every single one that takes about 2–3 minutes per order. With 100+ orders a day, that's ~29 hours/week just typing status emails. On top of that, nobody notices when an order gets stuck until a customer complains about it. 
@@ -37,6 +35,8 @@ GreenCart's support team checks each order's status individually and writes a se
 This workflow fixes both problems: it writes and sends the right email automatically based on the order's status, and it catches delayed orders on its own the moment they've been stuck for more than 2 days, no more waiting for a complaint.
 
 • **Architecture breakdown**
+
+<img width="560" height="160" alt="Architecture-Breakdown" src="https://github.com/user-attachments/assets/fc3c9842-42c4-432e-8fb3-cb028c79308c" />
 
 • **Why separate Set nodes per branch**
 
@@ -54,17 +54,21 @@ As for messy data — if days_in_status comes in blank or isn't actually a numbe
 
 <img width="648" height="241" alt="Full-Workflow-Canvas" src="https://github.com/user-attachments/assets/bd6fb04a-37ac-4967-a544-bdfe1ff5b545" />
 
+
 • 2. Switch Node configuration (all 3 conditions)
 
 <img width="948" height="363" alt="Switch-Node-Configuration" src="https://github.com/user-attachments/assets/b3e3ffe8-6719-4430-ac3c-eb88703cc83a" />
+
 
 • 3. IF Node Escalation rule (days_in_status > 2)
 
 <img width="944" height="346" alt="IF-Node-Escalation-Rule" src="https://github.com/user-attachments/assets/885afd8b-0c36-4957-be7a-5271a9c19389" />
 
+
 • 4. Execution Log showing green status output
 
 <img width="786" height="364" alt="Execution-Log" src="https://github.com/user-attachments/assets/fa6be86e-f363-4883-a849-275ebfb6f4c8" />
+
 
 **3. Live Test Results**
 
