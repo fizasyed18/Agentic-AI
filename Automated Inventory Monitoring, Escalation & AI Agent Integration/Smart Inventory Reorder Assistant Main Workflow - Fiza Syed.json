@@ -1,0 +1,709 @@
+{
+  "name": "Smart Inventory Reorder Assistant Main Workflow - Fiza Syed",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 10
+            }
+          ]
+        }
+      },
+      "id": "ce7c21c7-ec1e-4434-ab37-a743846bdf40",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -352,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1HuMbSfJvvBC-K_av6V8wc_Fp3zA8uHCS9rn_KbjqoqM",
+          "mode": "list",
+          "cachedResultName": "inventory_sheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1HuMbSfJvvBC-K_av6V8wc_Fp3zA8uHCS9rn_KbjqoqM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1741597835,
+          "mode": "list",
+          "cachedResultName": "inventory",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1HuMbSfJvvBC-K_av6V8wc_Fp3zA8uHCS9rn_KbjqoqM/edit#gid=1741597835"
+        },
+        "options": {}
+      },
+      "id": "b9a2f1e9-2634-4407-b17d-89cfe582b842",
+      "name": "Read Inventory Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -176,
+        16
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "TYircoPxsijORMlR",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json['Stock Status'] }}",
+                    "rightValue": "In Stock",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "717ba66d-6cd8-4db1-89a4-fbcba6cd9a37"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "In Stock"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "ad5f2769-ef1b-425e-bc7e-a8f4c87b46db",
+                    "leftValue": "={{ $json['Stock Status'] }}",
+                    "rightValue": "Low Stock",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Low Stock"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "b064de95-182c-4d90-8899-b6947e8e566c",
+                    "leftValue": "={{ $json['Stock Status'] }}",
+                    "rightValue": "Out of Stock",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Out of Stock"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b46cbdcf-01bf-4f83-92a7-6fc56bb7a3ba",
+      "name": "Switch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "bea122fd-d757-4b02-87cd-fc6a3bb0297d",
+              "leftValue": "={{ $json['Units Left'] }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "lte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "649e26ab-8f13-4d7a-a2f7-41087da20214",
+      "name": "If: Critical Shortage",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        224,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "916cf755-3886-434b-af99-0783c4f36c6b",
+              "name": "emailSubject",
+              "value": "URGENT: Inventory Reorder Required",
+              "type": "string"
+            },
+            {
+              "id": "5ae1e003-15cd-4af6-abb3-c9d9bddbf9c9",
+              "name": "emailBody",
+              "value": "=URGENT INVENTORY ALERT: \n\nItem: {{ $json['Item Name'] }}\nSupplier: {{ $json.Supplier }}\nUnits Left: {{ $json['Units Left'] }}\nReorder Date: {{ $json['Reorder Date'] }}\n\nImmediate purchasing action is required.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "86b72bba-8746-4964-908d-704142fc46c8",
+      "name": "Build Urgent Escalation Email",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        432,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "purchasing.manager@example.com",
+        "subject": "={{ $json.emailSubject }}",
+        "emailType": "text",
+        "message": "={{ $json.emailBody }}",
+        "options": {}
+      },
+      "id": "2b516db6-b86e-4ff9-a0aa-73337c4e9510",
+      "name": "Send Critical Escalation Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        640,
+        144
+      ],
+      "webhookId": "e4ff1df1-d333-4ec0-bd3f-f3651c8db631",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "RSxkp6bJ4OJkiNEE",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9c1a1a1a-1111-4a1a-8a1a-000000000010",
+              "name": "escalationStatus",
+              "value": "Out of Stock - Monitoring (non-critical)",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "7813c580-a3fd-401a-9da1-a21e224a5e33",
+      "name": "Prepare Non-Critical Out of Stock",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        432,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "18ad35a3-e276-4936-a84b-a4c721c08126",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -192,
+        800
+      ],
+      "webhookId": "d6971f06-64e6-46ee-b0c5-e956614a2947"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are the Smart Inventory Reorder Assistant for a retail warehouse. You help staff check stock levels, find supplier contact details, and prepare reorder communications.\n\nTools available to you:\n- Direct Inventory Tool: reads the live Inventory Google Sheet (Item Name, Supplier, Stock Status, Units Left, Reorder Date). Pass the exact Item Name you want to look up.\n- Suppliers Lookup (MCP Client): looks up Supplier Name, Contact Person and Contact Email via the Suppliers MCP Server.\n- Reorder Email Specialist: a sub-agent that writes polished reorder email copy for you.\n- Create Email Draft (Gmail): saves a DRAFT email in Gmail. It can never send or dispatch anything.\n\nSTRICT GUARDRAIL: You must NEVER send, dispatch, or claim to have sent an email to a supplier under any circumstances - you do not have a tool capable of sending email. If a user asks you to email a supplier, you must always: (1) look up the correct supplier contact using the Suppliers Lookup tool, (2) draft the email content (optionally using the Reorder Email Specialist), (3) show the full draft - To, Subject, and Body - to the user in the chat, and (4) explicitly ask the user to approve it before doing anything further. Only use the Create Email Draft tool after the user approves, and even then it only creates a draft, never a sent email."
+        }
+      },
+      "id": "720e3dce-5a0b-4055-a995-c9711099a999",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        32,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {}
+      },
+      "id": "9c0773dc-f5f4-4883-895b-18c26436dc6e",
+      "name": "Groq Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -128,
+        1008
+      ],
+      "credentials": {
+        "groqApi": {
+          "id": "1mblLPLMEadexPpV",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "fb8771c5-2cc8-48fd-805e-f87b28c40062",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        16,
+        1008
+      ]
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://fiza-syed.app.n8n.cloud/mcp/4a3d3eb6-dd25-4cef-8807-842314c56a9e",
+        "options": {}
+      },
+      "id": "b57cc735-0a6d-4030-b2e4-3acc10714ee7",
+      "name": "MCP Client",
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.4,
+      "position": [
+        624,
+        992
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1HuMbSfJvvBC-K_av6V8wc_Fp3zA8uHCS9rn_KbjqoqM",
+          "mode": "list",
+          "cachedResultName": "inventory_sheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1HuMbSfJvvBC-K_av6V8wc_Fp3zA8uHCS9rn_KbjqoqM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1741597835,
+          "mode": "list",
+          "cachedResultName": "inventory",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1HuMbSfJvvBC-K_av6V8wc_Fp3zA8uHCS9rn_KbjqoqM/edit#gid=1741597835"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Item Name",
+              "lookupValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Item_Name', 'The exact item name to look up in the inventory sheet') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b8b91684-3924-4805-b727-f769ba602f1a",
+      "name": "Direct Inventory Tool",
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        448,
+        992
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "TYircoPxsijORMlR",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "numberInputs": 4
+      },
+      "id": "f28b910b-c050-46d8-a65a-5bd89548afd6",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1024,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "fieldsToSummarize": {
+          "values": [
+            {
+              "field": "Item Name"
+            }
+          ]
+        },
+        "fieldsToSplitBy": "Stock Status",
+        "options": {}
+      },
+      "id": "2ed01b09-b52b-445d-a2dd-1aff942b94ac",
+      "name": "Inventory Summary",
+      "type": "n8n-nodes-base.summarize",
+      "typeVersion": 1.1,
+      "position": [
+        1216,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Reorder_Details', 'Item name, supplier name, contact person, contact email, units left, and urgency context to base the drafted reorder email on', 'string') }}",
+        "options": {
+          "systemMessage": "You are the Reorder Email Specialist. You write clear, professional reorder request emails to suppliers based on the item, supplier, and contact details you are given. You NEVER send anything and have no ability to send email - you only return drafted Subject and Body text for a human (or the calling agent) to review."
+        }
+      },
+      "id": "0870aa21-6c73-4168-b169-13e0d17a740f",
+      "name": "Reorder Email Specialist",
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 2.2,
+      "position": [
+        144,
+        992
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', 'The email subject line') }}",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Body', 'The full email body text, including the intended recipient name so a human can address it before sending') }}",
+        "options": {}
+      },
+      "id": "c6800454-9743-4e6f-9612-df10934fc9e4",
+      "name": "Create Email Draft (Gmail)",
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        800,
+        992
+      ],
+      "webhookId": "aae90c0c-6c04-4c24-bd54-966afc290fef",
+      "notesInFlow": true,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "RSxkp6bJ4OJkiNEE",
+          "name": "Gmail account"
+        }
+      },
+      "notes": "Gmail's Draft/Create operation has no recipient field - n8n does not support pre-filling 'To' on a draft. The agent must state the intended supplier email clearly in the chat reply so a human can add it before sending."
+    },
+    {
+      "parameters": {
+        "model": "qwen/qwen3-32b",
+        "options": {}
+      },
+      "id": "b6d5bfd4-9e72-41b8-b145-02e45dea9a3e",
+      "name": "Groq Chat Model (Email Specialist)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        144,
+        1200
+      ],
+      "credentials": {
+        "groqApi": {
+          "id": "1mblLPLMEadexPpV",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Core Automation & Live Data Branching\nStage 1: Schedule Trigger + Live Google Sheets\nStage 2: Switch routes by Stock Status\nStage 3: IF flags critical Out-of-Stock shortages\nStage 4: Set + Gmail = Purchasing Manager alert\nStage 5: Merge recombines all branches\nStage 6: Summarize totals by status",
+        "height": 300,
+        "width": 460,
+        "color": 5
+      },
+      "id": "5580399d-1d32-4b3d-b998-32eeea1dd867",
+      "name": "Stage 1-2-3-4-5-6: Core Automation & Escalation",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -736,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## AI Assistant & Tooling Integration\nStage 1: Chat Trigger -> AI Agent + Groq Chat Model + Memory\nStage 2: Direct Inventory Tool (Google Sheets)\nStage 3: MCP Client Tool -> Suppliers MCP Server (separate workflow)\nStage 4: System prompt guardrail (never email without showing draft first)",
+        "height": 260,
+        "width": 480,
+        "color": 4
+      },
+      "id": "4aa7ff5b-d980-4ffb-b99c-379433da2ef5",
+      "name": "AI Assistant & Tooling",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -800,
+        960
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Read Inventory Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Inventory Sheet": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        [
+          {
+            "node": "If: Critical Shortage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If: Critical Shortage": {
+      "main": [
+        [
+          {
+            "node": "Build Urgent Escalation Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare Non-Critical Out of Stock",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Urgent Escalation Email": {
+      "main": [
+        [
+          {
+            "node": "Send Critical Escalation Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Critical Escalation Email": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Prepare Non-Critical Out of Stock": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MCP Client": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Direct Inventory Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Inventory Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model (Email Specialist)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Reorder Email Specialist",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reorder Email Specialist": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Email Draft (Gmail)": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "46d0f6f0-9e06-4570-85fc-cb15bdd1f993",
+  "meta": {
+    "instanceId": "4fb2e9a6c38b2478f3d5d5b82927d811a8b54df72cb56076610128ccba19aadf"
+  },
+  "nodeGroups": [],
+  "id": "gqGYrMuZiszxoGTF",
+  "tags": []
+}

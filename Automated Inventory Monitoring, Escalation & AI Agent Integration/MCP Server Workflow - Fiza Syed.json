@@ -1,0 +1,95 @@
+{
+  "name": "MCP Server Workflow - Fiza Syed",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "4a3d3eb6-dd25-4cef-8807-842314c56a9e"
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpTrigger",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "e3b6ce16-82ce-408f-a387-110d9cc6d91f",
+      "name": "MCP Server Trigger",
+      "webhookId": "4a3d3eb6-dd25-4cef-8807-842314c56a9e"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1763-zDDdfBaaLWLEl1zG9nRwFrni_8NbiJmvylBM4AQ",
+          "mode": "list",
+          "cachedResultName": "supplier_sheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1763-zDDdfBaaLWLEl1zG9nRwFrni_8NbiJmvylBM4AQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 132996564,
+          "mode": "list",
+          "cachedResultName": "suppliers",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1763-zDDdfBaaLWLEl1zG9nRwFrni_8NbiJmvylBM4AQ/edit#gid=132996564"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        96,
+        208
+      ],
+      "id": "9c302764-d3f9-47a7-8db5-90067525235c",
+      "name": "Supplier Sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "TYircoPxsijORMlR",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Custom MCP Server & Tool (Stage 3)\nExposes the Suppliers sheet to any MCP-compatible client (n8n's MCP Client Tool, or an external client such as Claude Desktop / another n8n instance).\n\nActivate this workflow, then copy the MCP Server Trigger's production SSE URL into the main workflow's 'Tool: Suppliers Lookup (MCP)' node.",
+        "height": 240,
+        "width": 460,
+        "color": 6
+      },
+      "id": "8a7b0265-8de6-49b9-9973-24356ef1cf26",
+      "name": "Suppliers MCP Server",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -560,
+        96
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Supplier Sheet": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "ddf97ea0-5924-469a-bbb0-9efcff034c01",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4fb2e9a6c38b2478f3d5d5b82927d811a8b54df72cb56076610128ccba19aadf"
+  },
+  "nodeGroups": [],
+  "id": "I6cwq0VE4uot0cs0",
+  "tags": []
+}
