@@ -1,0 +1,1038 @@
+{
+  "name": "GreenCart",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -544,
+        64
+      ],
+      "id": "876c47d4-5947-4c25-8890-a7804b8f4cf7",
+      "name": "Manual Trigger"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.order_status }}",
+                    "rightValue": "Processing",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "76747ea6-5d16-4672-b729-249de936f057"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Processing"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "a1463993-89fa-4d65-9c22-d8b075815f89",
+                    "leftValue": "={{ $json.order_status }}",
+                    "rightValue": "Shipped",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Shipped"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "07970099-353d-440c-98e7-ce0848ba2525",
+                    "leftValue": "={{ $json.order_status }}",
+                    "rightValue": "Delayed",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Delayed"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -96,
+        48
+      ],
+      "id": "4528ba14-2586-437b-95e2-d16b06f57fcc",
+      "name": "Status Routing"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "da2d9368-91bc-450b-bf11-e126e9dbcd35",
+              "name": "order_id",
+              "value": "={{ $json.order_id }}",
+              "type": "string"
+            },
+            {
+              "id": "9ebebe2d-a823-4b96-b776-ea314a32fb38",
+              "name": "customer_name",
+              "value": "={{ $json.customer_name }}",
+              "type": "string"
+            },
+            {
+              "id": "e528a747-c87b-4abb-84ba-2627fb3986f5",
+              "name": "email",
+              "value": "={{ $json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "321695eb-41a3-4484-b65a-d17f9d7f232e",
+              "name": "order_status",
+              "value": "={{ ($json.order_status || '').toString().trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "e3b1fe9e-bb0c-4839-918f-51d228835803",
+              "name": "day_in_status_raw",
+              "value": "={{ $json.days_in_status }}",
+              "type": "number"
+            },
+            {
+              "id": "418ed862-6b73-4ef4-9f88-24edaab913bd",
+              "name": "days_in_status",
+              "value": "={{ isNaN(Number($json.days_in_status)) ? 0 : Number($json.days_in_status) }}",
+              "type": "number"
+            },
+            {
+              "id": "26a84dcd-a5e0-42df-b635-1500c5a717ef",
+              "name": "edgeCase",
+              "value": "={{ $json.days_in_status === undefined || $json.days_in_status === null || $json.days_in_status === '' || isNaN(Number($json.days_in_status)) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -320,
+        64
+      ],
+      "id": "e0489b89-a718-4410-bdaa-fef368405394",
+      "name": "Data Cleanup Node"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d60481ba-4a1c-4e47-9470-102e28d716db",
+              "name": "recipientEmail",
+              "value": "={{ $json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "f4a8ee2a-40bc-4589-857f-a8058919da9f",
+              "name": "emailSubject",
+              "value": "=Your GreenCart Order {{ $json.order_id }} is Being Processed",
+              "type": "string"
+            },
+            {
+              "id": "99ea4ddb-183d-4d02-bb44-62ddb2a879e5",
+              "name": "emailBody",
+              "value": "=Hi {{ $json.customer_name }}, Your GreenCart order {{ $json.order_id }} is currently being processed.  We are preparing your order and will update you once it has been shipped. Thank you for shopping with GreenCart!",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        304,
+        -144
+      ],
+      "id": "4b53b860-37c5-4800-821c-d517ca8c3064",
+      "name": "Processing Email"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "83ff56f8-58fb-432a-8e95-075d2e4c5c1c",
+              "name": "recipientEmail",
+              "value": "={{ $json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "f93b895a-2c19-4be8-a35d-0bd43cf14b77",
+              "name": "emailSubject",
+              "value": "=Your GreenCart Order {{ $json.order_id }} Has Shipped",
+              "type": "string"
+            },
+            {
+              "id": "1bfdf72a-c359-477c-99b4-d424edad6663",
+              "name": "emailBody",
+              "value": "=Hi {{ $json.customer_name }}, Good news! Your GreenCart order {{ $json.order_id }} has been shipped. Your order is now on its way to you. Thank you for shopping with GreenCart!",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        304,
+        64
+      ],
+      "id": "e5a989c8-eefc-4fbe-93f6-51a836018580",
+      "name": "Shipped Email"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2459e46b-21ac-4923-bf9e-122249717632",
+              "name": "recipientEmail",
+              "value": "={{ $json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "42692917-c87e-486f-a325-d39f7d542b0d",
+              "name": "emailSubject",
+              "value": "=Update on Your GreenCart Order {{ $json.order_id }}",
+              "type": "string"
+            },
+            {
+              "id": "8f9e1010-5176-49be-9fb0-f6db0de455b6",
+              "name": "emailBody",
+              "value": "=Hi {{ $json.customer_name }}, We apologize, your GreenCart order {{ $json.order_id }} has been delayed. Your order has been in the current status for {{ $json.days_in_status }} days. We are working to resolve the delay and will provide another update as soon as possible. We apologize for the inconvenience. GreenCart Support",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        304,
+        288
+      ],
+      "id": "fdae8112-beb0-49bd-8cc1-e7e0c0bb6dde",
+      "name": "Delayed Email"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.recipientEmail }}",
+        "subject": "={{ $json.emailSubject }}",
+        "emailType": "text",
+        "message": "={{ $json.emailBody }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        560,
+        -144
+      ],
+      "id": "67f5abe9-511a-4b80-9b47-fc6866e2b57b",
+      "name": "Send Processing Email",
+      "webhookId": "fd4c367e-5466-4fb0-8481-06e0177f1702",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "RSxkp6bJ4OJkiNEE",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.recipientEmail }}",
+        "subject": "={{ $json.emailSubject }}",
+        "emailType": "text",
+        "message": "={{ $json.emailBody }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        560,
+        64
+      ],
+      "id": "990914e8-aebe-4193-9110-fe04f22e8576",
+      "name": "Send Shipped Email",
+      "webhookId": "23b9f08e-99ee-49e3-81cc-6350f2574e16",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "RSxkp6bJ4OJkiNEE",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.recipientEmail }}",
+        "subject": "={{ $json.emailSubject }}",
+        "emailType": "text",
+        "message": "={{ $json.emailBody }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        560,
+        288
+      ],
+      "id": "25b5fdd9-f935-4c27-9abc-8334c3d4f962",
+      "name": "Send Delayed Email",
+      "webhookId": "8b3522de-1257-451f-873a-15fcddd86e97",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "RSxkp6bJ4OJkiNEE",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5cf18098-8eeb-483a-b755-56a01b4149ce",
+              "name": "emailSubject",
+              "value": "=[ESCALATION] Order #{{ $('Data Cleanup Node').item.json.order_id }} Delayed {{ $('Data Cleanup Node').item.json.days_in_status }} Days — SLA Breach",
+              "type": "string"
+            },
+            {
+              "id": "ef0edd2c-2a27-4ffe-bad1-90e0844d4cf4",
+              "name": "emailBody",
+              "value": "=Warehouse Team,  Order #{{ $('Data Cleanup Node').item.json.order_id }} for {{ $('Data Cleanup Node').item.json.customer_name }} has been in \"Delayed\" status for {{ $('Data Cleanup Node').item.json.days_in_status }} day(s), which exceeds the 2-day SLA boundary.  Please investigate and expedite this order as a priority.  Customer email: {{ $('Data Cleanup Node').item.json.email }}  - Automated GreenCart Escalation Notifier",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1120,
+        272
+      ],
+      "id": "5640a109-1d45-443a-977e-08e9afc57e8a",
+      "name": "Build Warehouse Escalation email"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a70a18cf-16d2-47c4-9415-538a1cd9c7a4",
+              "name": "timestamp",
+              "value": "{{ $now.toISO() }}",
+              "type": "string"
+            },
+            {
+              "id": "9a5f58ca-3840-4149-b014-22b959c1853a",
+              "name": "order_id",
+              "value": "={{ $('Data Cleanup Node').item.json.order_id }}",
+              "type": "string"
+            },
+            {
+              "id": "37b70978-8043-4cb2-bdfe-47d80011961f",
+              "name": "order_status",
+              "value": "={{ $('Data Cleanup Node').item.json.order_status }}",
+              "type": "string"
+            },
+            {
+              "id": "b86246be-4fef-441c-95f9-2a4e98e717d5",
+              "name": "days_in_status",
+              "value": "={{ $('Data Cleanup Node').item.json.days_in_status }}",
+              "type": "number"
+            },
+            {
+              "id": "74fc588a-76a8-493b-82d3-16f2a497d8ad",
+              "name": "escalated",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "cce5290d-92b7-4ba7-bd93-a7b664837b35",
+              "name": "edgeCase",
+              "value": "={{ $('Data Cleanup Node').item.json.edgeCase }}",
+              "type": "boolean"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        816,
+        -144
+      ],
+      "id": "52e825a2-bf8d-43a0-9491-9cc93f678961",
+      "name": "Processing Log"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f38a34d2-f4c3-4051-8adf-63144b8129e4",
+              "name": "timestamp",
+              "value": "{{ $now.toISO() }}",
+              "type": "string"
+            },
+            {
+              "id": "8e29cff8-3c00-4519-9b79-5c7b9eb23b70",
+              "name": "order_id",
+              "value": "={{ $('Data Cleanup Node').item.json.order_id }}",
+              "type": "string"
+            },
+            {
+              "id": "25b32f53-d31e-4006-9119-984a0d1c86a1",
+              "name": "order_status",
+              "value": "={{ $('Data Cleanup Node').item.json.order_status }}",
+              "type": "string"
+            },
+            {
+              "id": "da4f61af-76b6-4b2c-964f-61895d716417",
+              "name": "days_in_status",
+              "value": "={{ $('Data Cleanup Node').item.json.days_in_status }}",
+              "type": "number"
+            },
+            {
+              "id": "405aeb2a-e3e5-4ff1-ac9d-9f8f45cc3c67",
+              "name": "escalated",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "dfe097ba-6c06-4314-91fb-88395f038ac8",
+              "name": "edgeCase",
+              "value": "={{ $('Data Cleanup Node').item.json.edgeCase }}",
+              "type": "boolean"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        816,
+        64
+      ],
+      "id": "198659a0-6cdb-45aa-a5c3-ade047359dc3",
+      "name": "Shipped Log"
+    },
+    {
+      "parameters": {
+        "sendTo": "warehouse-team@greencart.com",
+        "subject": "={{ $json.emailSubject }}",
+        "emailType": "text",
+        "message": "={{ $json.emailBody }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1344,
+        272
+      ],
+      "id": "f3539e86-33c7-4c4f-802c-52bcd93a4ba7",
+      "name": "Send Warehouse Email",
+      "webhookId": "5497f95b-e57c-47e2-8ac0-66fc8db2b883",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "RSxkp6bJ4OJkiNEE",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1xP2TS3pQG02vT_XoNjNjZkz9Byeatu-e7I6tC4MZIqU",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Order Logs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1xP2TS3pQG02vT_XoNjNjZkz9Byeatu-e7I6tC4MZIqU/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "timestamp": "={{ $now }}",
+            "order_id": "={{ $json.order_id }}",
+            "status": "={{ $json.order_status }}",
+            "days": "={{ $json.days_in_status }}",
+            "escalated": "={{ $json.escalated }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "order_id",
+              "displayName": "order_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "days",
+              "displayName": "days",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "escalated",
+              "displayName": "escalated",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1840,
+        64
+      ],
+      "id": "ec9d8bcb-6bfe-4fb6-a0c6-52b6e95fedd0",
+      "name": "Log Order Sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "TYircoPxsijORMlR",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "04f3cc41-dce3-4785-87db-da963abf0fa2",
+              "name": "timestamp",
+              "value": "{{ $now.toISO() }}",
+              "type": "string"
+            },
+            {
+              "id": "111f005b-a985-4cf1-8be9-360402882bfc",
+              "name": "order_id",
+              "value": "={{ $('Data Cleanup Node').item.json.order_id }}",
+              "type": "string"
+            },
+            {
+              "id": "cbdf5863-db08-4412-a62a-dbf92305c58d",
+              "name": "order_status",
+              "value": "={{ $('Data Cleanup Node').item.json.order_status }}",
+              "type": "string"
+            },
+            {
+              "id": "baa5a84a-ea62-4be0-a456-ae5d65eb2f1b",
+              "name": "days_in_status",
+              "value": "={{ $('Data Cleanup Node').item.json.days_in_status }}",
+              "type": "number"
+            },
+            {
+              "id": "a7a7c5ce-7ad0-45f1-a191-3d75537a71a5",
+              "name": "escalated",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "562809d2-5475-47d3-b1cc-2c64b3915d11",
+              "name": "edgeCase",
+              "value": "={{ $('Data Cleanup Node').item.json.edgeCase }}",
+              "type": "boolean"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1600,
+        272
+      ],
+      "id": "ea3705be-623c-48ff-9fed-3084c171f330",
+      "name": "Delayed-Escalated Log"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "60398c0b-f3cf-4855-aa19-15e920745b59",
+              "name": "timestamp",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            },
+            {
+              "id": "64e9398d-7f2d-4941-aff5-0c42340ad1fd",
+              "name": "order_id",
+              "value": "={{ $('Data Cleanup Node').item.json.order_id }}",
+              "type": "string"
+            },
+            {
+              "id": "cc405cd8-1bbc-4d48-8fc4-34f067c240ed",
+              "name": "order_status",
+              "value": "={{ $('Data Cleanup Node').item.json.order_status }}",
+              "type": "string"
+            },
+            {
+              "id": "fa24adaf-9437-4032-abf4-787c578b98c6",
+              "name": "days_in_status",
+              "value": "={{ $('Data Cleanup Node').item.json.days_in_status }}",
+              "type": "number"
+            },
+            {
+              "id": "0d66e427-59ee-4714-86d4-2f123355ae63",
+              "name": "escalated",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "90146efa-2605-474c-9eb8-2859acefd696",
+              "name": "edgeCase",
+              "value": "={{ $('Data Cleanup Node').item.json.edgeCase }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1120,
+        544
+      ],
+      "id": "b34ee8e1-1aa0-4afe-aa67-16e8913a9a78",
+      "name": "Delayed-Not Escalated Log"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "b8c10709-1972-4a82-85c3-327ca44da082",
+              "leftValue": "={{ $('Data Cleanup Node').item.json.days_in_status }}",
+              "rightValue": 2,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        816,
+        288
+      ],
+      "id": "e8ac90f2-6d48-4720-a7bf-f6f782818194",
+      "name": "Daily Escalation Check (days > 2)"
+    }
+  ],
+  "pinData": {
+    "Manual Trigger": [
+      {
+        "json": {
+          "order_id": "GC-1001",
+          "customer_name": "Taylor Chen",
+          "email": "taylor.chen@example.com",
+          "order_status": "Delayed",
+          "days_in_status": 4
+        }
+      },
+      {
+        "json": {
+          "order_id": "GC-1002",
+          "customer_name": "Sarah Chen",
+          "email": "sarah.chen@example.com",
+          "order_status": "Processing",
+          "days_in_status": 2
+        }
+      },
+      {
+        "json": {
+          "order_id": "GC-1003",
+          "customer_name": "Marcus Lee",
+          "email": "marcus.lee@example.com",
+          "order_status": "Shipped",
+          "days_in_status": 1
+        }
+      },
+      {
+        "json": {
+          "order_id": "GC-1004",
+          "customer_name": "Emma Wilson",
+          "email": "emma.wilson@example.com",
+          "order_status": "Processing",
+          "days_in_status": 0
+        }
+      },
+      {
+        "json": {
+          "order_id": "GC-1005",
+          "customer_name": "Daniel Khan",
+          "email": "daniel.khan@example.com",
+          "order_status": "Delayed",
+          "days_in_status": 2
+        }
+      },
+      {
+        "json": {
+          "order_id": "GC-1006",
+          "customer_name": "Olivia Martin",
+          "email": "olivia.martin@example.com",
+          "order_status": "Delayed",
+          "days_in_status": 3
+        }
+      },
+      {
+        "json": {
+          "order_id": "GC-1007",
+          "customer_name": "James Anderson",
+          "email": "james.anderson@example.com",
+          "order_status": "Shipped",
+          "days_in_status": 0
+        }
+      },
+      {
+        "json": {
+          "order_id": "GC-1008",
+          "customer_name": "Ayesha Malik",
+          "email": "ayesha.malik@example.com",
+          "order_status": "Processing",
+          "days_in_status": 1
+        }
+      },
+      {
+        "json": {
+          "order_id": "GC-1009",
+          "customer_name": "Noah Brown",
+          "email": "noah.brown@example.com",
+          "order_status": "Delayed",
+          "days_in_status": 5
+        }
+      },
+      {
+        "json": {
+          "order_id": "GC-1010",
+          "customer_name": "Sophia Garcia",
+          "email": "sophia.garcia@example.com",
+          "order_status": "Processing",
+          "days_in_status": 3
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Data Cleanup Node",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Status Routing": {
+      "main": [
+        [
+          {
+            "node": "Processing Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Shipped Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Delayed Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data Cleanup Node": {
+      "main": [
+        [
+          {
+            "node": "Status Routing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Processing Email": {
+      "main": [
+        [
+          {
+            "node": "Send Processing Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Shipped Email": {
+      "main": [
+        [
+          {
+            "node": "Send Shipped Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delayed Email": {
+      "main": [
+        [
+          {
+            "node": "Send Delayed Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Delayed Email": {
+      "main": [
+        [
+          {
+            "node": "Daily Escalation Check (days > 2)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Processing Email": {
+      "main": [
+        [
+          {
+            "node": "Processing Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Shipped Email": {
+      "main": [
+        [
+          {
+            "node": "Shipped Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Warehouse Escalation email": {
+      "main": [
+        [
+          {
+            "node": "Send Warehouse Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Warehouse Email": {
+      "main": [
+        [
+          {
+            "node": "Delayed-Escalated Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Shipped Log": {
+      "main": [
+        [
+          {
+            "node": "Log Order Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Processing Log": {
+      "main": [
+        [
+          {
+            "node": "Log Order Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delayed-Escalated Log": {
+      "main": [
+        [
+          {
+            "node": "Log Order Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delayed-Not Escalated Log": {
+      "main": [
+        [
+          {
+            "node": "Log Order Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily Escalation Check (days > 2)": {
+      "main": [
+        [
+          {
+            "node": "Build Warehouse Escalation email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Delayed-Not Escalated Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "a819b555-34ca-4cbe-83d3-7299e05a284c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4fb2e9a6c38b2478f3d5d5b82927d811a8b54df72cb56076610128ccba19aadf"
+  },
+  "nodeGroups": [],
+  "id": "46hOrk7yQTUfQ2NA",
+  "tags": []
+}
