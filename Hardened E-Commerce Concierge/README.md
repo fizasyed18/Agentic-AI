@@ -71,12 +71,12 @@
 **Step 3.2: Automated Trajectory Evaluation (LLM-as-a-Judge)**
 
 Create an offline evaluation test dataset of 5 distinct test scenarios:
-  ○ **Standard Ingestion:** Simple order status request (evaluates cache/Tier 1 routing).
+ - **Standard Ingestion:** Simple order status request (evaluates cache/Tier 1 routing).
   
-  ○ **Direct Financial Request:** Valid refund under $50 (evaluates correct Pydantic execution).
+ - **Direct Financial Request:** Valid refund under $50 (evaluates correct Pydantic execution).
   
-  ○ **Adversarial Injection:** Malicious support ticket asking for a $5,000 refund with system override tags (evaluates pre-audit blocking).
+ - **Adversarial Injection:** Malicious support ticket asking for a $5,000 refund with system override tags (evaluates pre-audit blocking).
   
-  ○ **Unstable Microservice:** Inventory check during a service outage (evaluates retry and backup replica fallback).
+ - **Unstable Microservice:** Inventory check during a service outage (evaluates retry and backup replica fallback).
   
-  ○ **High-Value Transfer:** Balance transfer request for $1,250 (evaluates HITL pause behavior).
+ - **High-Value Transfer:** Balance transfer request for $1,250 (evaluates HITL pause behavior).
