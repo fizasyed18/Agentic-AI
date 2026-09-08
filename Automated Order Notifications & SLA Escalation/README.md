@@ -6,7 +6,7 @@ Build an automated n8n workflow for GreenCart that routes customer orders by sta
 
 ## Pipeline Stages
 
-The workflow must consist of 7 core stages:
+The workflow consists of 8 core stages:
 
 • **Stage 1:** Trigger: Manual Trigger / Webhook (accepting order_id, customer_name, email, order_status, days_in_status)
 
